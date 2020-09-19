@@ -1,5 +1,4 @@
 import * as cdk from '@aws-cdk/core';
-import * as codebuild from '@aws-cdk/aws-codebuild';
 import * as codepipeline from '@aws-cdk/aws-codepipeline';
 import * as codepipeline_actions from '@aws-cdk/aws-codepipeline-actions';
 import * as ecr from '@aws-cdk/aws-ecr'
@@ -11,7 +10,7 @@ export class CiCdStack extends cdk.Stack {
     super(scope, id, props);
     const githubRepoOwner ='blackdog0403';
     const githubRepoBranch = 'master';
-    const githubRepoUrl = 'https://github.com/blackdog0403/podinfo.git';
+    const githubRepoName = 'podinfo';
 
     const ecrRepository = new ecr.Repository(this, 'CdkEcr' ,{
       imageScanOnPush: false,
@@ -24,21 +23,21 @@ export class CiCdStack extends cdk.Stack {
     ecrRepository.grantPullPush(cdkBuildProject.role!);
 
     const sourceOutput = new codepipeline.Artifact();
-    const cdkBuildOutput = new codepipeline.Artifact('CdkBuildOutput');
+    // const cdkBuildOutput = new codepipeline.Artifact('build-arfifact');
 
-    new codepipeline.Pipeline(this, 'Pipeline', {
+    new codepipeline.Pipeline(this, 'CdkPipeline', {
       
       stages: [
         {
           stageName: 'Source',
           actions: [
             new codepipeline_actions.GitHubSourceAction({
-              actionName: 'Github_Source',
-              repo: githubRepoUrl,
+              actionName: 'GithubSource',
+              repo: githubRepoName,
               output: sourceOutput,
               owner: githubRepoOwner,
               branch: githubRepoBranch,
-              oauthToken: cdk.SecretValue.secretsManager("dev-cdk8s-demo")
+              oauthToken: cdk.SecretValue.secretsManager("dev-cdk8s-new")
             })
           ]
         },
@@ -48,13 +47,12 @@ export class CiCdStack extends cdk.Stack {
             new codepipeline_actions.CodeBuildAction({
               actionName: 'BuildAndPushToECR',
               project: cdkBuildProject,
-              input: sourceOutput,
-              outputs: [ cdkBuildOutput ]
+              input: sourceOutput
             })
           ]
         }
       ]
-    })
+    });
 
 
   }

@@ -7,7 +7,7 @@ export function generateCodeBuildProject (scope: cdk.Construct, ecrRepository: s
     const cdkBuild = new codebuild.PipelineProject(scope, 'CdkBuild', {
         projectName: 'cdk8s-demo-docker-build',
         
-        environmentVariables: { 'ECR_REPO_URI': {
+        environmentVariables: { 'IMAGE_REPOSITORY': {
             value: ecrRepository
         }},
         
@@ -27,14 +27,14 @@ export function generateCodeBuildProject (scope: cdk.Construct, ecrRepository: s
                 },
                 build: {
                     commands: [
-                        'docker build -t $ECR_REPO_URI:latest .',
-                        'docker tag $ECR_REPO_URI:latest $ECR_REPO_URI:$IMAGE_TAG'
+                        'docker build -t $IMAGE_REPOSITORY:latest .',
+                        'docker tag $IMAGE_REPOSITORY:latest $IMAGE_REPOSITORY:$IMAGE_TAG'
                     ]
                 },
                 post_build: {
                     commands: [
-                        'docker push $ECR_REPO_URI:latest',
-                        'docker push $ECR_REPO_URI:$IMAGE_TAG'
+                        'docker push $IMAGE_REPOSITORY:latest',
+                        'docker push $IMAGE_REPOSITORY:$IMAGE_TAG'
                     ]
                 }
             }
