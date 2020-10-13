@@ -4,6 +4,7 @@ import * as codepipeline_actions from '@aws-cdk/aws-codepipeline-actions';
 import * as ecr from '@aws-cdk/aws-ecr'
 
 import { generateCodeBuildProject } from './buildspec'
+import { SecretValue } from '@aws-cdk/core';
 
 export class CiCdStack extends cdk.Stack {
   constructor(scope: cdk.App, id: string, props?: cdk.StackProps) {
@@ -37,7 +38,10 @@ export class CiCdStack extends cdk.Stack {
               output: sourceOutput,
               owner: githubRepoOwner,
               branch: githubRepoBranch,
-              oauthToken: cdk.SecretValue.secretsManager("dev-cdk8s-new")
+              // AWS Secret Manager에 기 생성한 gihub oauth token을 등록하고 해당 이름으로 수정할 것 
+              // Secret value는 공개 형상 저장소에 저장할 수 없으므로 별도의 private cdk 프로젝트를 사용하던지
+              // AWS consone을 통해서 등록할 것
+              oauthToken: cdk.SecretValue.secretsManager("dev-cdk8s-new") 
             })
           ]
         },
